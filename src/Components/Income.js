@@ -4,7 +4,7 @@ import { Doughnut } from "react-chartjs-2";
 import { useSelector } from "react-redux";
 import { HiCurrencyDollar } from "react-icons/hi";
 import { MdDeleteForever } from "react-icons/md";
-import { handleDelete } from "../redux-state/AccountingActions";
+import { handleDelete } from "../redux-state/AccountingReducer/AccountingActions";
 import { useDispatch } from "react-redux";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -93,7 +93,7 @@ const Income = () => {
       <div className=" flex justify-center items-center mt-3 mb-3 xl:px-24 px-4">
         <Doughnut data={data} />
       </div>
-      <div className="array   rounded-md mx-1 flex flex-col justify-start mt-8 xl:mt-0 h-[45%] xl:h-[40%] md:h-[55%] lg:[40%] xl:px-3 px-1 hover:overflow-y-scroll overflow-hidden">
+      <div className="array   rounded-md mx-1 flex flex-col justify-start mt-8 xl:mt-0 h-[40%] xl:h-[40%] md:h-[55%] lg:[40%] xl:px-3 px-1 hover:overflow-y-scroll overflow-hidden">
         {incomeList.map((item) => (
           <div
             style={{
@@ -108,6 +108,7 @@ const Income = () => {
             </div>
             <div className="dollarlogo text-sm xl:text-lg md:text-lg whitespace-nowrap flex items-center justify-start w-[28%] ">
               {item.category}
+              {/* {item.id} */}
             </div>
 
             <div className="amount text-sm xl:text-base md:text-lg flex items-center justify-center w-[28%] ">

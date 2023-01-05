@@ -1,12 +1,20 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addExpense, addIncome } from "../redux-state/AccountingActions";
-import { useState } from "react";
+import {
+  addExpense,
+  addIncome,
+} from "../redux-state/AccountingReducer/AccountingActions";
+import { useEffect, useState } from "react";
 import { HiCurrencyDollar } from "react-icons/hi";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import { db, auth } from "../firebase";
+import { loginFailure } from "../redux-state/AuthReducer/AuthActions";
 
 const Balance = () => {
   /////////
   /////////
+  const { user: currentUser } = useSelector((state) => state.AuthReducer);
 
   const { incomeList, expenseList } = useSelector(
     (state) => state.AccountingReducer
@@ -14,10 +22,107 @@ const Balance = () => {
 
   const dispatch = useDispatch();
 
+  // const [userIncome, setUserIncome] = useState([]);
+  const [user, setUser] = useState({});
+
   const [type, setType] = useState("");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// this is to get complete collection of users or anything
+  /// or to get all docs present in a collection
+  // useEffect(() => {
+  //   (async () => {
+  //     const users = await getDocs(collection(db, "users"));
+  //     const usersArr = [];
+  //     users.forEach((user) => {
+  //       usersArr.push({ ...user.data(), id: user.id });
+  //     });
+  //     setAllUsers(usersArr);
+  //   })();
+  // }, []);
+  // console.log(allUsers);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// this is to get single doc or user from a specific collection
+  ///fetching collection of user income
+  // useEffect(() => {
+  //   (async () => {
+  //     const currentUserIncomeCollection = doc(db, "income", currentUser.uid);
+  //     const currentUserIncomeArray = await getDoc(currentUserIncomeCollection);
+  //     setUserIncome(currentUserIncomeArray.data());
+  //   })();
+  // }, [currentUser.uid]);
+
+  // console.log(userIncome);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const currentUserCredentials = doc(db, "users", currentUser.uid);
+  //     const currentUserCredentialsData = await getDoc(currentUserCredentials);
+  //     setUser(currentUserCredentialsData.data());
+  //   })();
+  // }, [currentUser.uid]);
+
+  //this is realtime
+  useEffect(() => {
+    onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
+      const data = doc.data();
+      setUser(data);
+    });
+  }, [currentUser.uid, dispatch]);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const transactionObject = {
+      type: type,
+      category: category,
+      amount: amount,
+      date: date,
+      id: Math.round(Math.random() * 10000),
+    };
+
+    if (type === "Income") {
+      (async () => {
+        await setDoc(doc(db, "income", currentUser.uid), {
+          income: [...(incomeList || []), transactionObject],
+        });
+      })();
+    } else if (type === "Expense") {
+      (async () => {
+        await setDoc(doc(db, "expense", currentUser.uid), {
+          expense: [...(expenseList || []), transactionObject],
+        });
+      })();
+    }
+    setType("");
+    setAmount("");
+    setCategory("");
+    setDate("");
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Real Time DataBase Fetching
+  useEffect(() => {
+    onSnapshot(doc(db, "income", currentUser.uid), (doc) => {
+      const data = doc.data();
+      dispatch(addIncome(data.income));
+      // console.log(data.income.map((item) => item.amount));
+    });
+  }, [currentUser.uid, dispatch]);
+
+  useEffect(() => {
+    onSnapshot(doc(db, "expense", currentUser.uid), (doc) => {
+      const data = doc.data();
+      dispatch(addExpense(data.expense));
+      // console.log(data.income.map((item) => item.amount));
+    });
+  }, [currentUser.uid, dispatch]);
 
   const totalIncome = incomeList
     .map((item) => Number(item.amount))
@@ -29,49 +134,41 @@ const Balance = () => {
 
   const currentBalance = totalIncome - totalExpense;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (type === "Income") {
-      dispatch(
-        addIncome(
-          {
-            type: type,
-            category: category,
-            amount: amount,
-            date: date,
-            id: Math.round(Math.random() * 10000),
-          },
-          totalIncome
-        )
-      );
-    } else if (type === "Expense") {
-      dispatch(
-        addExpense(
-          {
-            type: type,
-            category: category,
-            amount: amount,
-            date: date,
-            id: Math.round(Math.random() * 10000),
-          },
-          totalExpense
-        )
-      );
-    }
-    setType("");
-    setAmount("");
-    setCategory("");
-    setDate("");
+  ///////////////////////////////////////////////////////////////////////
+  const logOut = () => {
+    signOut(auth)
+      .then((user) => {
+        dispatch(loginFailure(user));
+        // localStorage.removeItem("user", JSON.stringify(null));
+        localStorage.clear();
+      })
+      .catch((error) => {
+        // An error happened.
+      });
   };
 
   ///////////////////////////////////////////////////////////////////////
+
   return (
-    <div className="   bg-white w-screen md:w-[70%] lg:w-[70%] h-full xl:w-[30%] xl:h-[92%]  rounded-md my-0 flex flex-col xl:block">
+    <div className="   bg-white w-screen md:w-[70%] lg:w-[70%] h-screen xl:w-[30%] xl:h-[100%]  rounded-md my-0 flex flex-col xl:block">
       {/* div 1 Main Heading */}
+      {/* {allUsers.map((user) =>
+        user.id === currentUser.uid ? (
+          <div
+            key={user.id}
+            className="xl:my-2 mt-8 mb-1 text-center flex-auto text-slate-600"
+          >
+            <h1 className="xl:text-4xl uppercase md:text-5xl text-4xl font-bold py-2 ">
+              {user.username}
+            </h1>
+          </div>
+        ) : (
+          ""
+        )
+      )} */}
       <div className="xl:my-2 mt-8 mb-1 text-center flex-auto text-slate-600">
         <h1 className="xl:text-4xl uppercase md:text-5xl text-4xl font-bold py-2 ">
-          Expense Tracker
+          {user.username}
         </h1>
       </div>
       {/* div 2 Total Balance */}
@@ -94,7 +191,7 @@ const Balance = () => {
       )}
       <hr />
       <form
-        className="flex flex-col xl:block flex-auto mb-10  "
+        className="flex flex-col xl:block flex-auto   "
         onSubmit={handleSubmit}
       >
         {/* Select Transaction Type */}
@@ -104,7 +201,9 @@ const Balance = () => {
           }}
           className="border-2  border-gray-400 mx-5 xl:my-6 my-4 p-2 xl:p-1  hover:bg-slate-100  rounded-md"
         >
-          <p className=" pl-1 text-gray-500  ">Type</p>
+          <label className=" pl-1 text-gray-500 " htmlFor="type">
+            Type
+          </label>
           <select
             className="text-xl pt-2 w-full hover:bg-slate-100 rounded-md focus:outline-none bg-white"
             name="type"
@@ -126,7 +225,9 @@ const Balance = () => {
           }}
           className="border-2 border-gray-400 mx-5 xl:my-6 my-4 p-2 xl:p-1 hover:bg-slate-100 rounded-md"
         >
-          <p className=" pl-1 text-gray-500">Category</p>
+          <label className=" pl-1 text-gray-500" htmlFor="category">
+            Category
+          </label>
           <select
             required
             className="text-xl pt-2 w-full  hover:bg-slate-100 rounded-md focus:outline-none bg-white"
@@ -177,9 +278,12 @@ const Balance = () => {
           }}
           className="border-2 border-gray-400 mx-5 xl:my-6 my-4 p-2 xl:p-1 hover:bg-slate-100 rounded-md"
         >
-          <p className=" pl-1 text-gray-500">Date</p>
+          <label className=" pl-1 text-gray-500" htmlFor="date">
+            Date
+          </label>
           <input
             className="text-xl pt-2 w-full  hover:bg-slate-100 rounded-md focus:outline-none bg-white"
+            name="date"
             type="date"
             required
             value={date}
@@ -194,8 +298,11 @@ const Balance = () => {
           }}
           className="border-2 border-gray-400 mx-5 xl:my-6 my-4 p-2 xl:p-1 hover:bg-slate-100 rounded-md"
         >
-          <p className=" pl-1 text-gray-500">Amount</p>
+          <label className=" pl-1 text-gray-500" htmlFor="amount">
+            Amount
+          </label>
           <input
+            name="amount"
             className="text-xl pt-2 w-full  hover:bg-slate-100 rounded-md focus:outline-none"
             type="number"
             required
@@ -221,6 +328,20 @@ const Balance = () => {
           </div>
         </div>
       </form>
+
+      <div className="flex justify-center ">
+        {" "}
+        <div
+          style={{
+            boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
+          }}
+          className="buttons border-2 border-gray-400  mt-6 xl:mt-4 xl:mb-2 hover:bg-slate-200 rounded-md flex justify-center items-center xl:text-xl text-lg w-3/5 "
+        >
+          <button className="p-3 w-full" onClick={logOut}>
+            LogOut
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

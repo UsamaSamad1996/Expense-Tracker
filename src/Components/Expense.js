@@ -3,7 +3,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { useSelector } from "react-redux";
 import { MdDeleteForever } from "react-icons/md";
-import { handleDelete } from "../redux-state/AccountingActions";
+import { handleDelete } from "../redux-state/AccountingReducer/AccountingActions";
 import { useDispatch } from "react-redux";
 import { HiCurrencyDollar } from "react-icons/hi";
 
@@ -23,18 +23,15 @@ const Expense = () => {
   const consolidator = (arg) => {
     const newArr = [];
 
-    const arr = JSON.parse(JSON.stringify(arg));
+    const mainArr = JSON.parse(JSON.stringify(arg));
 
-    arr.forEach((arrItem) => {
-      const ind = newArr.findIndex(
-        (item) => item.category === arrItem.category
-      );
+    mainArr.forEach((arrItem) => {
+      const i = newArr.findIndex((item) => item.category === arrItem.category);
 
-      if (ind === -1) {
+      if (i === -1) {
         newArr.push(arrItem);
       } else {
-        newArr[ind].amount =
-          Number(newArr[ind].amount) + Number(arrItem.amount);
+        newArr[i].amount = Number(newArr[i].amount) + Number(arrItem.amount);
       }
     });
 
@@ -42,7 +39,7 @@ const Expense = () => {
     return newArr;
   };
 
-  let expenseItems = consolidator(expenseList);
+  const expenseItems = consolidator(expenseList);
 
   const totalExpenseAmounts = expenseItems.map((item) => Number(item.amount));
 
@@ -97,7 +94,7 @@ const Expense = () => {
       <div className=" flex justify-center items-center mt-3 mb-3 xl:px-24 px-4">
         <Doughnut data={data} />
       </div>
-      <div className="array   rounded-md mx-1 mt-8 xl:mt-0 flex flex-col justify-start h-[42%] xl:h-[40%] md:h-[55%] lg:[40%]  xl:px-3 px-1 hover:overflow-y-scroll overflow-hidden">
+      <div className="array   rounded-md mx-1 mt-8 xl:mt-0 flex flex-col justify-start h-[40%] xl:h-[40%] md:h-[55%] lg:[40%]  xl:px-3 px-1 hover:overflow-y-scroll overflow-hidden">
         {expenseList.map((item) => (
           <div
             style={{

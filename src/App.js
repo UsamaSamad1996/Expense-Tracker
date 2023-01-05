@@ -1,22 +1,44 @@
-import React from "react";
-import Balance from "./Components/Balance";
-import Expense from "./Components/Expense";
-import Income from "./Components/Income";
+import React, { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import { useSelector } from "react-redux";
+import Register from "./pages/Register";
 
 const App = () => {
   ///
   //////////////////////////////////////////
 
+  const { user } = useSelector((state) => state.AuthReducer);
+
+  // console.log(user);
+
+  useEffect(() => {
+    localStorage.setItem("user", JSON.stringify(user));
+  }, [user]);
+
+  const RequireAuth = ({ children }) => {
+    return user ? children : <Navigate to="/register" />;
+  };
   //////////////////////////////////////////////////
 
   return (
-    <div className="flex  xl:h-screen xl:items-center">
-      <div className="flex flex-col  xl:flex-row xl:justify-evenly items-center xl:h-screen xl:py-10 flex-auto bg-slate-400 md:bg-blue-500">
-        <Income className="xl:flex-auto " />
-        <Balance className="xl:flex-auto" />
-        <Expense className="xl:flex-auto" />
-      </div>
-    </div>
+    <>
+      <Routes>
+        <Route exact path="/login" element={<LoginPage />} />
+        <Route exact path="/register" element={<Register />} />
+
+        <Route
+          exact
+          path="/"
+          element={
+            <RequireAuth>
+              <HomePage />
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </>
   );
 };
 
