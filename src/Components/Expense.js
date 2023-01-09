@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { useSelector } from "react-redux";
@@ -6,23 +6,37 @@ import { MdDeleteForever } from "react-icons/md";
 import { handleDelete } from "../redux-state/AccountingReducer/AccountingActions";
 import { useDispatch } from "react-redux";
 import { HiCurrencyDollar } from "react-icons/hi";
+import { setDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const Expense = () => {
   ////
-  ///////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  const { user: currentUser } = useSelector((state) => state.AuthReducer);
 
   const { expenseList } = useSelector((state) => state.AccountingReducer);
   const dispatch = useDispatch();
 
-  //////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // here we updating expenseList Array After Deleting
+  useEffect(() => {
+    if (expenseList.length !== 0) {
+      (async () => {
+        await setDoc(doc(db, "expense", currentUser.uid), {
+          expense: expenseList,
+        });
+      })();
+    }
+  }, [expenseList, currentUser.uid]);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   const consolidator = (arg) => {
     const newArr = [];
-
     const mainArr = JSON.parse(JSON.stringify(arg));
 
     mainArr.forEach((arrItem) => {
@@ -34,8 +48,6 @@ const Expense = () => {
         newArr[i].amount = Number(newArr[i].amount) + Number(arrItem.amount);
       }
     });
-
-    // console.log(newArr);
     return newArr;
   };
 
@@ -48,11 +60,10 @@ const Expense = () => {
     0
   );
 
-  // console.log(totalExpense);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   const data = {
     labels: expenseItems.map((item) => item.category),
-
     datasets: [
       {
         label: "$",
@@ -79,49 +90,49 @@ const Expense = () => {
     ],
   };
 
-  ///////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
-    <div className="bg-white rounded-md w-screen h-screen md:w-[70%] lg:w-[70%]  xl:w-[32%] xl:h-[100%]  py-2  my-5 xl:my-0">
-      <div className="expense mt-2 mb-2 flex justify-center items-center ">
-        <h2 className="xl:text-3xl text-2xl text-slate-600 font-semibold flex items-center">
+    <div className="bg-white rounded-md w-screen h-full md:w-[70%] lg:w-[70%]  xl:w-[32%]  my-10 xl:my-0 flex flex-col ">
+      <div className="expense  xl:h-[10%] flex justify-center items-center py-3 bg-blue-400 md:bg-white rounded-full xl:py-0">
+        <h2 className=" text-2xl xl:text-3xl md:text-slate-600 text-white bg-blue-400 md:bg-white flex-auto  font-semibold flex items-center justify-center">
           Total Expense
-          <HiCurrencyDollar className="text-red-500 text-5xl ml-3" />
+          <HiCurrencyDollar className="text-red-600  bg-white rounded-full text-5xl  ml-3 mr-1" />
           {totalExpense.toLocaleString()}
         </h2>
       </div>
       <hr />
-      <div className=" flex justify-center items-center mt-3 mb-3 xl:px-24 px-4">
+      <div className=" flex justify-center items-center h-[50%]  xl:h-[50%] py-4">
         <Doughnut data={data} />
       </div>
-      <div className="array   rounded-md mx-1 mt-8 xl:mt-0 flex flex-col justify-start h-[40%] xl:h-[40%] md:h-[55%] lg:[40%]  xl:px-3 px-1 hover:overflow-y-scroll overflow-hidden">
+      <div className="array   rounded-md  flex flex-col justify-start h-[18rem] xl:h-[40%]  mx-3 mb-4 xl:mb-2 scrollbar-none hover:overflow-y-scroll overflow-hidden ">
         {expenseList.map((item) => (
           <div
             style={{
               boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
             }}
             key={item.id}
-            className="flex  items-center   py-2 border-2 border-gray-400 my-2 rounded-md "
+            className="flex  items-center   py-2 border-2 border-gray-400 my-2 md:mx-3 mx-1 rounded-md hover:bg-slate-100"
           >
             <div className="dollar flex items-center justify-center w-[11%]">
               {" "}
-              <HiCurrencyDollar className="text-red-500 text-4xl" />
+              <HiCurrencyDollar className="text-red-600 text-4xl" />
             </div>
-            <div className="dollarlogo text-sm xl:text-lg md:text-lg whitespace-nowrap flex items-center justify-start w-[28%] ">
+            <div className="dollarlogo text-sm xl:text-lg md:text-lg whitespace-nowrap flex items-center justify-start w-[30%] truncate">
               {item.category}
             </div>
 
             <div className="amount text-sm xl:text-base md:text-lg flex items-center justify-center w-[28%] ">
               {item.date}
             </div>
-            <div className="amount text-sm xl:text-base md:text-lg flex items-center justify-start  w-[22%]">
+            <div className="amount text-sm xl:text-base md:text-lg flex items-center justify-start  w-[20%]">
               $ {Number(item.amount).toLocaleString()}
             </div>
 
             <div className="deleteItem   flex items-center  w-[11%] justify-center">
               <button
                 onClick={() => dispatch(handleDelete(item.id))}
-                className="bg-blue-500 rounded-md p-[2px] text-white text-2xl"
+                className="bg-blue-500 rounded-md p-[2px] text-white text-2xl hover:bg-red-600"
               >
                 <MdDeleteForever />
               </button>

@@ -1,11 +1,5 @@
 /////////////
 
-// export const loginStart = (userCredentials) => ({
-//   type: "LOGIN_START",
-// });
-
-/////
-
 export const loginSuccess = (user) => ({
   type: "LOGIN_SUCCESS",
   payload: user,
@@ -13,7 +7,7 @@ export const loginSuccess = (user) => ({
 
 /////
 
-export const loginFailure = (error) => ({
-  type: "LOGIN_FAILURE",
+export const loggingOut = (error) => ({
+  type: "LOG_OUT",
   payload: error,
 });
