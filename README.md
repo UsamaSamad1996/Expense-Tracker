@@ -1,4 +1,4 @@
-# Expense Tracker - Aka aaSaaN CashBook
+# Expense Tracker - aaSaaN CashBook
 
 
 ## Live Url
