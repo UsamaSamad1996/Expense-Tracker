@@ -33,6 +33,8 @@ const Expense = () => {
     }
   }, [expenseList, currentUser.uid]);
 
+  // console.log(expenseList);
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   const consolidator = (arg) => {

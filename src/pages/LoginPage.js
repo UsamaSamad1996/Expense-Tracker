@@ -22,11 +22,7 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // if (errorMsg) {
-    //   setIsFetching(false);
-    // } else {
-    //   setIsFetching(true);
-    // }
+
     setIsFetching(true);
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {

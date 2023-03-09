@@ -7,6 +7,8 @@ import {
 import { useEffect, useState } from "react";
 import { HiCurrencyDollar } from "react-icons/hi";
 import { doc, setDoc, onSnapshot } from "firebase/firestore";
+// import { collection, query, where } from "firebase/firestore";
+
 import { signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { loggingOut } from "../redux-state/AuthReducer/AuthActions";
@@ -96,13 +98,25 @@ const Balance = () => {
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   /// Real Time DataBase Fetching
-  /// here we get user expense collecton in form of array from firebase backend
+  /// here we get user expense collecton in form of array from firebase backend & updating state in reducer
   useEffect(() => {
     onSnapshot(doc(db, "expense", currentUser.uid), (doc) => {
       const data = doc.data();
       dispatch(addExpense(data.expense));
     });
   }, [currentUser.uid, dispatch]);
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Real Time DataBase Fetching
+  /// here we get user complete collecton in form of array from firebase backend
+
+  // useEffect(() => {
+  //   onSnapshot(query(collection(db, "users")), (querySnapshot) => {
+  //     querySnapshot.forEach((doc) => {
+  //       console.log(doc.data());
+  //     });
+  //   });
+  // }, []);
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   ///here we are calculating user Current Account Balance
