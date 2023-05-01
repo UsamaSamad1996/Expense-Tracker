@@ -13,6 +13,8 @@ import { signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { loggingOut } from "../redux-state/AuthReducer/AuthActions";
 import { CircularProgress } from "@material-ui/core";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Balance = () => {
   /////////
@@ -33,6 +35,8 @@ const Balance = () => {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
 
+  console.log({ date });
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   /// here we get user information stored when user created
   useEffect(() => {
@@ -51,7 +55,7 @@ const Balance = () => {
       type: type,
       category: category,
       amount: amount,
-      date: date,
+      date: String(date),
       id: Math.round(Math.random() * 10000),
     };
 
@@ -107,18 +111,6 @@ const Balance = () => {
   }, [currentUser.uid, dispatch]);
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Real Time DataBase Fetching
-  /// here we get user complete collecton in form of array from firebase backend
-
-  // useEffect(() => {
-  //   onSnapshot(query(collection(db, "users")), (querySnapshot) => {
-  //     querySnapshot.forEach((doc) => {
-  //       console.log(doc.data());
-  //     });
-  //   });
-  // }, []);
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
   ///here we are calculating user Current Account Balance
   const totalIncome = incomeList
     .map((item) => Number(item.amount))
@@ -143,199 +135,162 @@ const Balance = () => {
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
-    <div className=" bg-gradient-to-b from-blue-500 to-white  md:bg-gradient-to-b md:from-white md:to-white w-screen md:w-[70%] lg:w-[70%]  xl:w-[30%] h-full xl:rounded-md flex flex-col">
-      <div className=" h-[13%] justify-center flex items-center  flex-wrap py-5 xl:py-0 ">
-        <h1 className="capitalize px-5 pt-2 leading-snug text-5xl text-center font-bold text-white md:text-slate-600 xl:drop-shadow-none">
+    <div className=" bg-gradient-to-b from-blue-500 to-white  md:bg-gradient-to-b md:from-[#1A1B21] md:to-[#1A1B21] w-screen md:w-[70%] lg:w-[70%]  xl:w-[30%] h-full xl:rounded-md flex flex-col">
+      <div className=" justify-center flex items-center  flex-wrap py-5 xl:py-0 ">
+        <h1 className="capitalize px-5 pt-5 tracking-wide text-2xl text-center font-semibold text-white  xl:drop-shadow-none">
           {user.username}
         </h1>
       </div>
       {currentBalance ? (
-        <div className="md:pt-5">
-          {" "}
-          {currentBalance >= 0 ? (
-            <div className="h-[13%] flex justify-center items-center  pt-5 pb-3">
-              <h2 className="text-2xl xl:text-3xl text-white  md:text-slate-600 font-semibold  flex justify-center items-center">
-                Balance
-                <HiCurrencyDollar className="text-green-600 bg-white rounded-full text-5xl ml-3 mr-1" />
-                {Number(currentBalance).toLocaleString()}
-              </h2>
-            </div>
-          ) : (
-            <div className="h-[13%] flex justify-center items-center   py-5 ">
-              <h2 className="text-2xl xl:text-3xl font-semibold text-white md:text-slate-600 flex justify-center items-center">
-                Total Balance
-                <HiCurrencyDollar className="text-red-600 bg-white rounded-full text-5xl ml-3 mr-1" />
-                {Number(currentBalance).toLocaleString()}
-              </h2>
-            </div>
-          )}
+        <div className=" flex justify-center items-end ">
+          <h2 className="text-2xl xl:text-xl text-white  pt-5 font-semibold  flex justify-center items-center">
+            Balance
+            <HiCurrencyDollar
+              className={`${
+                currentBalance >= 0 ? "text-green-600" : "text-red-600"
+              }   bg-white rounded-full text-2xl ml-3 mr-2`}
+            />
+            {Number(currentBalance).toLocaleString()}
+          </h2>
         </div>
       ) : (
-        <div className="h-[13%] flex justify-center items-center   py-5 ">
-          <h2 className="text-2xl xl:text-3xl font-semibold text-white md:text-slate-600 flex justify-center items-center">
+        <div className="h-[10%] flex justify-center items-center   py-5 ">
+          <h2 className="text-2xl xl:text-3xl font-semibold text-white  flex justify-center items-center">
             <CircularProgress size="50px" />
           </h2>
         </div>
       )}
-
-      <div className=" h-[61%] flex flex-col py-5 ">
-        {" "}
-        <form className="h-full  " onSubmit={handleSubmit}>
-          {/* Select Transaction Type */}
-          <div
-            style={{
-              boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-            }}
-            className="border-b-2 md:border-2 border-gray-400 flex flex-col justify-evenly p-1 h-[15%] mb-4 mt-3 mx-4 hover:bg-slate-100 rounded-md bg-white "
+      <form className="flex flex-col py-3  " onSubmit={handleSubmit}>
+        {/* Select Transaction Type */}
+        <div className="border-b-2 md:border-0 border-gray-400 flex flex-col justify-evenly p-[6px]  mb-4 mt-3 mx-4  rounded-md md:bg-[#23252C] bg-white md:text-white ">
+          <label
+            className=" px-2 text-gray-500 md:text-white text-[11px] "
+            htmlFor="type"
           >
-            <label className=" px-2 text-gray-500 text-sm" htmlFor="type">
-              Type
-            </label>
-            <select
-              className="text-md px-1 w-full hover:bg-slate-100 rounded-md focus:outline-none mt-2 xl:mt-0 bg-white"
-              name="type"
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              required
-            >
-              <option value="none">Transaction Type</option>
-              <option value="Income">Income</option>
-              <option value="Expense">Expense</option>
-            </select>
-          </div>
-
-          {/* Select Category */}
-          <div
-            style={{
-              boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-            }}
-            className="border-b-2 md:border-2 border-gray-400 flex flex-col justify-evenly p-1 h-[15%] mb-4 mx-4 hover:bg-slate-100 rounded-md bg-white"
+            Type
+          </label>
+          <select
+            className="text-md w-full px-1  rounded-md focus:outline-none mt-2 xl:mt-2 md:bg-[#23252C] bg-white md:text-white"
+            name="type"
+            id="type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            required
           >
-            <label className=" px-2 text-gray-500 text-sm" htmlFor="category">
-              Category
-            </label>
-            <select
-              required
-              className="text-md px-1 w-full  hover:bg-slate-100 rounded-md focus:outline-none mt-2 xl:mt-0 bg-white"
-              name="category"
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              {type === "Income" ? (
-                // Income Categories
-                <>
-                  <option>Category</option>
-                  <option value="Business">Business</option>
-                  <option value="Investments Profit">
-                    Profit On Investments
-                  </option>
-                  <option value="Extra Income">Extra Income</option>
-                  <option value="Salary">Salary</option>
-                  <option value="Savings">Savings</option>
-                  <option value="Rental Income">Rental Income</option>
-                  <option value="Loan">Loan</option>
-                </>
-              ) : type === "Expense" ? (
-                <>
-                  <option>Category</option>
-                  <option value="Utilities">Utilities</option>
-                  <option value="Vehicle">Vehicle</option>
-                  <option value="Clothes">Clothes</option>
-                  <option value="Travelling">Travelling</option>
-                  <option value="Food">Food</option>
-                  <option value="House">House</option>
-                  <option value="Phone">Phone</option>
-                  <option value="Entertainment">Entertainment</option>
-                  <option value="R/M Others">Repair Maintinance Others</option>
-                  <option value="Miscellaneous Items">
-                    Miscellaneous Items
-                  </option>
-                </>
-              ) : (
-                ""
-              )}
-            </select>
-          </div>
+            <option value="none">Transaction Type</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+          </select>
+        </div>
 
-          {/* Select Date input field */}
-          <div
-            style={{
-              boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-            }}
-            className="border-b-2 md:border-2 border-gray-400 flex flex-col justify-evenly p-1 h-[15%] mb-4 mx-4 hover:bg-slate-100 rounded-md bg-white"
+        {/* Select Category */}
+        <div className="border-b-2 md:border-0 border-gray-400 flex flex-col justify-evenly p-[6px]  mb-4 mx-4  rounded-md md:bg-[#23252C] bg-white md:text-white">
+          <label
+            className=" px-2 text-gray-500 md:text-white text-[11px] "
+            htmlFor="category"
           >
-            <label className=" px-2 text-gray-500 text-sm" htmlFor="date">
-              Date
-            </label>
-            <input
-              className="text-md w-full px-1 hover:bg-slate-100 rounded-md focus:outline-none mt-2 xl:mt-0 bg-white"
-              name="date"
-              type="date"
-              required
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-
-          {/* Add Amount input field */}
-          <div
-            style={{
-              boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-            }}
-            className="border-b-2 md:border-2 border-gray-400 flex flex-col justify-evenly   p-1 h-[15%] mb-4 mx-4 hover:bg-slate-100 rounded-md bg-white"
+            Category
+          </label>
+          <select
+            required
+            className="text-md w-full px-1  rounded-md focus:outline-none mt-2 xl:mt-2 md:bg-[#23252C] bg-white md:text-white"
+            name="category"
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
           >
-            <label className=" px-2 text-gray-500 text-sm" htmlFor="amount">
-              Amount
-            </label>
-            <input
-              name="amount"
-              className="text-md px-2 w-full  hover:bg-slate-100 rounded-md mt-2 xl:mt-0 focus:outline-none"
-              type="number"
-              required
-              placeholder="Add Amount "
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
+            {type === "Income" ? (
+              // Income Categories
+              <>
+                <option>Category</option>
+                <option value="Business">Business</option>
+                <option value="Investments Profit">
+                  Profit On Investments
+                </option>
+                <option value="Extra Income">Extra Income</option>
+                <option value="Salary">Salary</option>
+                <option value="Savings">Savings</option>
+                <option value="Rental Income">Rental Income</option>
+                <option value="Loan">Loan</option>
+              </>
+            ) : type === "Expense" ? (
+              <>
+                <option>Category</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Vehicle">Vehicle</option>
+                <option value="Clothes">Clothes</option>
+                <option value="Travelling">Travelling</option>
+                <option value="Food">Food</option>
+                <option value="House">House</option>
+                <option value="Phone">Phone</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="R/M Others">Repair Maintinance Others</option>
+                <option value="Miscellaneous Items">Miscellaneous Items</option>
+              </>
+            ) : (
+              ""
+            )}
+          </select>
+        </div>
 
-          {/* Button Create Entry  */}
+        {/* Select Date input field */}
+        <div className="border-b-2 md:border-0 border-gray-400 flex flex-col justify-evenly p-[6px]  mb-4 mx-4  rounded-md md:bg-[#23252C] bg-white md:text-white">
+          <label
+            className=" px-2 text-gray-500 md:text-white text-[11px] "
+            htmlFor="date"
+          >
+            Date
+          </label>
+          <DatePicker
+            className="text-md w-full px-2  rounded-md focus:outline-none mt-2 xl:mt-2 md:bg-[#23252C] bg-white md:text-white placeholder:text-sm placeholder:pl-0"
+            selected={date}
+            onChange={(e) => setDate(e)}
+            peekNextMonth
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
+            dateFormat="dd/MM/yyyy"
+            placeholderText="Select Date"
+          />
+        </div>
 
-          <div className="flex  justify-center items-end h-[20%] pt-5 xl:py-0  ">
-            {" "}
-            <div
-              style={{
-                boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-              }}
-              className="buttons bg-blue-600 hover:bg-blue-500  rounded-md flex justify-center items-center text-xl w-4/5 md:w-3/5 xl:w-4/5 "
-            >
-              <button
-                className="px-3 py-2 md:py-3 w-full text-white uppercase font-semibold"
-                type="submit"
-              >
-                Create Transaction
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-      <hr />
-      <div className="flex justify-center items-center h-[13%] pb-8 pt-4">
-        {" "}
-        <div
-          style={{
-            boxShadow: "8px 7px 6px 0px rgba(166,153,153,0.68)",
-          }}
-          className="buttons bg-red-600   hover:bg-red-500 rounded-md flex justify-center items-center  text-xl w-3/5 "
-        >
+        {/* Add Amount input field */}
+        <div className="border-b-2 md:border-0 border-gray-400 flex flex-col justify-evenly p-[6px]  mb-4 mx-4  rounded-md md:bg-[#23252C] bg-white md:text-white">
+          <label
+            className=" px-2 text-gray-500 md:text-white text-[11px] "
+            htmlFor="amount"
+          >
+            Amount
+          </label>
+          <input
+            name="amount"
+            className="text-md w-full px-2  rounded-md focus:outline-none mt-2 xl:mt-2 md:bg-[#23252C] bg-white md:text-white placeholder:text-sm placeholder:pl-0"
+            type="number"
+            required
+            placeholder="Add Amount "
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+
+        {/* Button Create Entry  */}
+
+        <div className="buttons w-full  p-2  flex justify-center items-center  ">
           <button
-            className="px-3 py-2 md:py-3 w-full text-white font-semibold "
-            onClick={logOut}
+            className="px-16 py-2 md:py-1 bg-blue-600 hover:bg-blue-500 rounded-sm  text-white  font-semibold"
+            type="submit"
           >
-            LogOut
+            Create Transaction
           </button>
         </div>
+      </form>
+      <div className="buttons  flex justify-center items-center pb-2 ">
+        <button
+          className="px-14 py-2 md:py-1 text-white font-semibold bg-red-600  rounded-sm  hover:bg-red-500 "
+          onClick={logOut}
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

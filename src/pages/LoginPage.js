@@ -39,7 +39,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="body  h-screen flex flex-col  md:items-center  xl:grid xl:grid-cols-2 xl:h-screen xl:items-center  bg-gradient-to-b from-blue-500 to-white">
+    <div className="body  h-screen flex flex-col  md:items-center  xl:grid xl:grid-cols-2 xl:h-screen xl:items-center  bg-gradient-to-b from-blue-500 to-white xl:bg-[#1A1B21]">
       <div className="AppNameDescription flex-auto flex flex-col justify-center  xl:py-10 xl:pl-10 xl:ml-20 md:w-[70%] ">
         <h1
           style={{ textShadow: "2px 5px 4px red" }}
